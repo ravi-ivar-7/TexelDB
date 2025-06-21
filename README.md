@@ -1,97 +1,126 @@
-# TexelDB Project - Complete Implementation
+# 🎠 Data-to-Video Encoding System
 
-## Project Overview
-TexelDB converts any file to a GIF image and back, implementing the "Text to Pixel" concept where data is stored as pixels in images.
+## Overall Idea
 
-## Architecture
-- **Frontend**: React with Next.js, Tailwind CSS, and shadcn/ui components
-- **Backend**: FastAPI with Python 3.11
-- **Core Algorithm**: Binary data to pixel conversion (0=black, 1=white)
+What if users could encode any file as a **video**?
 
-## Features Implemented
+This project enables encoding arbitrary files into a sequence of high-resolution images (currently `.png`), which are then compiled into a `.gif` video. Since a 4K video at 60fps can store a large amount of data, this approach offers an innovative way to **back up and share data visually**.
 
-✅ **Encoding Process**
-- Convert any file to binary data
-- Add filename and size headers
-- Convert bits to pixels (0=black, 1=white)
-- Arrange pixels in 4K resolution frames
-- Combine frames into GIF animation
+Currently, only `.gif` output is supported. However, with better encoding and video formats, this system could potentially rival traditional storage mechanisms for specific use-cases.
 
-✅ **Decoding Process**
-- Split GIF into individual frames
-- Convert pixels back to bits
-- Decode headers to get filename and size
-- Reconstruct original file perfectly
+---
 
-✅ **Error Handling**
-- Comprehensive error messages
-- Loading states and progress indicators
+## Example: Encoding an MP3 File
 
-✅ **API Endpoints**
-- POST /encode/ - Convert file to GIF
-- POST /decode/ - Convert GIF back to file
-- CORS enabled for frontend integration
+Suppose we want to encode the `test.mp3` audio file from the `backend/data` directory.
 
-## Technical Implementation
+We call the `encode()` function with the path to the `.mp3` file:
 
-### Backend (FastAPI)
-- Python 3.11 compatible
-- Uses Pillow, imageio, and bitstring libraries
-- Temporary file handling with proper cleanup
-- Streaming responses for file downloads
-
-### Frontend (React)
-- Modern React with hooks
-- Tailwind CSS for styling
-- shadcn/ui components for professional UI
-- File upload with drag-and-drop support
-- Responsive design for all devices
-
-## File Structure
-```
-texeldb/
-├── backend/
-│   ├── main.py              # FastAPI application
-│   ├── texeldb.py           # Core encoding/decoding logic
-│   └── requirements.txt     # Python dependencies
-└── frontend/
-    ├── src/
-    │   ├── App.jsx          # Main React component
-    │   ├── App.css          # Tailwind CSS styles
-    │   └── components/ui/   # shadcn/ui components
-    ├── index.html           # HTML entry point
-    └── package.json         # Node.js dependencies
+```python
+encode("data/test.mp3")
 ```
 
-## How to Run
+### What happens:
 
-### Backend
-```bash
-cd backend
-pip install -r requirements.txt # pip install -r requirements.txt --break-system-packages
+1. The file is read as raw binary.
+2. Each bit is converted to either a black pixel `(0, 0, 0)` for `0` or a white pixel `(255, 255, 255)` for `1`.
+3. These pixels are laid out on a 4K image (3840×2160).
+4. Multiple `.png` frames are generated and stored in the `/temp` directory.
+5. These frames are compiled into a final `.gif` file.
 
-python main.py
+**Generated Output**: `test.mp3.gif`
+
+![./backend/test.mp3.gif](./backend/test.mp3.gif)
+
+This example consists of 1 4K `.png` image at 10 frames per second.
+
+To increase the data bitrate, either:
+
+* Increase the `.png` resolution.
+* Increase the frame rate.
+
+> Note: A small header is added to the binary before pixel conversion. See `Encoding & Decoding Process` below for details.
+
+To recover the original file:
+
+```python
+decode("test.mp3.gif")
 ```
-Server runs on http://localhost:8000
 
-### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
-Application runs on http://localhost:5173
+This will:
 
-## Usage
-1. Open the web application
-2. Upload any file using the file picker
-3. Click "Encode File" to convert to GIF
-4. Download the generated GIF
-5. Upload a TexelDB GIF to decode back to original file
+* Split the `.gif` back into its `.png` frames.
+* Reverse the pixel encoding process.
+* Reconstruct the original file and save it as `test.mp3-recovered`.
 
-## Technical Details
-- Maximum file size per frame: ~1MB (4K resolution)
-- Encoding format: 4K (3840x2160) pixels per frame
-- Header format: 16-bit filename length + filename + 64-bit payload length
-- Compression: Lossless (no data loss during conversion)
+---
 
+## ⚙️ Encoding & Decoding Process
+
+### Step 1: Input & Headers
+
+The system takes an arbitrary file (e.g., `data/test.txt`) and reads it as raw binary.
+
+Then, three headers are prepended:
+
+![./headers.png](./headers.png)
+
+1. **Filename Length (16 bits)**:
+
+   * Indicates how many bits are used in the next section (the filename).
+   * Max: 65,535 bits → 8,192 characters.
+
+2. **Filename**:
+
+   * The actual name of the file in binary.
+   * Variable-length, defined by the previous section.
+
+3. **Payload Length (64 bits)**:
+
+   * Specifies the size of the payload in bits.
+   * Max file size: 2^64-1 bits.
+
+4. **Payload**:
+
+   * The raw binary content of the input file.
+
+---
+
+### Step 2: Binary to Pixels
+
+* Each bit is converted:
+
+  * `0` → black pixel `(0, 0, 0)`
+  * `1` → white pixel `(255, 255, 255)`
+* The result is a list of pixels.
+
+These pixels are placed on a `.png` image of size 3840×2160 (4K):
+
+* Total: 8,294,400 bits/frame ≈ 1 MB per frame.
+
+---
+
+### Step 3: Compile Frames into GIF
+
+* Once the binary has been split into frames, `.png` images are saved.
+* These images are compiled into a `.gif` at a specified frame rate.
+
+---
+
+### Decoding
+
+To decode:
+
+1. Split `.gif` into frames.
+2. Convert each pixel back to a bit (`0` or `1`).
+3. Read the headers:
+
+   * First 16 bits → filename length
+   * Next `n` bits → filename
+   * Next 64 bits → payload length
+   * Remaining bits → file content
+4. Reconstruct the original file.
+
+The recovered file is saved as `original_filename-recovered`.
+
+# Installation and About Project : see [Installation and About Project](about-and-installation.md)
