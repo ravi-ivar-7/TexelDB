@@ -3,12 +3,6 @@
 ## Overview
 TexelDB converts any file to a GIF image and back, implementing the "Text to Pixel" concept where data is stored as pixels in images.
 
-<p style="display: flex; align-items: center; gap: 20px;">
-  <img src="logo.png" alt="Logo" style="height: 400px;" />
-  <img src="poster.png" alt="Poster" style="height: 400px;" />
-</p>
-
-
 ## Architecture
 - **Frontend**: React with Next.js, Tailwind CSS, and shadcn/ui components
 - **Backend**: FastAPI with Python 3.11
@@ -72,6 +66,15 @@ texeldb/
 ## How to Run
 
 ### Backend
+### Running Tests:
+
+```
+cd backend
+python2 texeldb.py
+```
+
+### Running Backend Server: 
+
 ```bash
 cd backend
 pip install -r requirements.txt # pip install -r requirements.txt --break-system-packages
@@ -80,7 +83,7 @@ python main.py
 ```
 Server runs on http://localhost:8000
 
-### Frontend
+### Running Frontend Server
 ```bash
 cd frontend
 npm install

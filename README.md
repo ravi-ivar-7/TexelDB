@@ -1,6 +1,13 @@
 # 🎠 Data-to-Video Encoding System
 
-## Overall Idea
+<p style="display: flex; align-items: center; gap: 20px;">
+  <img src="logo.png" alt="Logo" style="height: 400px;" />
+  <img src="poster.png" alt="Poster" style="height: 400px;" />
+</p>
+
+## Installation and About Project : see [Installation and About Project](about-and-installation.md) md file
+
+## Idea
 
 What if users could encode any file as a **video**?
 
@@ -123,4 +130,4 @@ To decode:
 
 The recovered file is saved as `original_filename-recovered`.
 
-# Installation and About Project : see [Installation and About Project](about-and-installation.md)
+
